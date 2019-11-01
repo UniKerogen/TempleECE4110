@@ -147,10 +147,15 @@ class SentenceMatching:
         up_left = self.match_matrix[row - 1, column - 1]
         reference = self.reference[column - 1]
         hypothesis = self.hypothesis[row - 1]
+        # Word Mismatch Cost
+        substitute_multiplier = abs(StringMatching(reference=reference, hypothesis=hypothesis).cost_result())
         # Determine Reward and Cost multiplier
-        multiplier_vertical = len(self.hypothesis[row - 1])
-        multiplier_horizontal = len(self.reference[column - 1])
-        multiplier_diagonal = len(self.reference[column - 1])
+        max_length = max(len(self.hypothesis[row - 1]), len(self.reference[column - 1]))
+        min_length = min(len(self.hypothesis[row - 1]), len(self.reference[column - 1]))
+        total_length = len(self.hypothesis[row - 1]) + len(self.reference[column - 1]) + substitute_multiplier
+        multiplier_vertical = np.floor(len(self.hypothesis[row - 1]) / total_length * 10)
+        multiplier_horizontal = np.floor(len(self.reference[column - 1]) / total_length * 10)
+        multiplier_diagonal = np.floor(substitute_multiplier / total_length * 10)
         # Calculate the Pass
         diagonal = up_left + REWARD * multiplier_diagonal if reference == hypothesis \
             else up_left + COST * multiplier_diagonal
