@@ -124,9 +124,9 @@ class CoreThread(td.Thread):
 ##############################################################
 #   Function Prototype
 ##############################################################
-def race():
+def race(print_info=False):
     # Overlap Value
-    overlap = np.linspace(-1, 1, 1)
+    overlap = np.linspace(-1, 1, 11)
     # k in range of [1, 1024]
     k = [2 ** x for x in range(0, 11)]
     # Loop Thread
@@ -134,15 +134,18 @@ def race():
         d = {}
         threads = []
         index = 0
+        print("******* Now working with overlap at", overlap_value, "*******")
         for k_value in k:
             thread = CoreThread(overlap=overlap_value, k=k_value)
-            print("### Thread", index, "has been created ###")
+            if print_info:
+                print("### Thread", index, "has been created ###")
             try:
                 thread.start()
                 threads.append(thread)
-                print("### Thread", index, "has been started ###")
+                if print_info:
+                    print("### Thread", index, "has been started ###")
             except:
-                print("Unable to start threads", index)
+                print("Unable to start thread", index, "with k value of", k_value)
             index += 1
         for t in threads:
             t.join()
@@ -151,8 +154,8 @@ def athletic(overlap, k):
     # Generate Data
     data = DataGeneration(overlap=overlap)
     # Establish KNN
-    KNN = KNearestNeighbor(data=data)
-    error_rate = KNN.classify(k=k)
+    KNN = KNearestNeighbor(data=data, k=k)
+    error_rate = KNN.classify()
     # Return value
     return error_rate
 
