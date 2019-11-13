@@ -8,6 +8,7 @@ import threading as td
 import time
 import scipy
 from scipy.spatial.distance import cdist
+import multiprocessing as mp
 
 ##############################################################
 #   Variable Definition
@@ -124,6 +125,54 @@ class CoreThread(td.Thread):
 ##############################################################
 #   Function Prototype
 ##############################################################
+def subcore(overlap_value, print_info=True):
+    threads = []
+    index = 0
+    k = [2 ** x for x in range(0, 11)]
+    for k_value in k:
+        thread = CoreThread(overlap=overlap_value, k=k_value)
+        if print_info:
+            print("### Thread", index, "has been created ###")
+        try:
+            thread.start()
+            threads.append(thread)
+            if print_info:
+                print("### Thread", index, "has been started ###")
+        except:
+            print("Unable to start thread", index, "with k value of", k_value)
+        index += 1
+    for t in threads:
+        t.join()
+        
+def contest(print_info=False):
+    overlap = np.linspace(-1, 1, 11)
+    pool = mp.Pool(20)
+    pool.map(subcore, overlap)
+    pool.close()
+    pool.join()
+    
+def rally(print_info=False):
+    # Starting multiprocessors
+    print("Starting Process ...")
+    overlap = np.linspace(-1, 1, 11)
+    # Start 10 cores
+    for overlap_value in overlap:
+        cores = []
+        index = 0
+        # Initialize Core
+        core = mp.Process(target=subcore, args=(overlap_value, print_info))
+        # Start Core
+        core.start()
+        if print_info:
+            print("### Core has started ###")
+        # Append Core
+        cores.append(core)
+        # Sleep
+        time.sleep(0.1)
+    for t in cores:
+        t.join()
+    
+
 def race(print_info=False):
     # Overlap Value
     overlap = np.linspace(-1, 1, 11)
@@ -131,7 +180,6 @@ def race(print_info=False):
     k = [2 ** x for x in range(0, 11)]
     # Loop Thread
     for overlap_value in overlap:
-        d = {}
         threads = []
         index = 0
         print("******* Now working with overlap at", overlap_value, "*******")
@@ -184,16 +232,6 @@ def coach():
 ##############################################################
 def main():
     print("Hello World!")
-    # Time Plot
-    # k in range of [1, 1024]
-    # k = [2 ** x for x in range(0, 11)]
-    # start_time = time.time()
-    # for k_value in k:
-    #     athletic(overlap=0, k=k_value)
-    # end_time = time.time()
-    # print("It takes", end_time - start_time, "to run all k value when overlap is at 0")
-    # Overall error rate
-    # coach()
 
     # Individual Test
     # start = time.time()
@@ -202,7 +240,13 @@ def main():
     # print("Takes", end - start, "seconds")
 
     # Race
-    race()
+    # race(print_info=False)
+    
+    # Rally
+    # rally(print_info=True)
+    
+    # Contest
+    contest(print_info=False)
 
 
 ##############################################################
